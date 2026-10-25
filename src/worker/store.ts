@@ -5,6 +5,7 @@ export interface Env {
   PRICES: KVNamespace
   HISTORY: D1Database
   ASSETS: Fetcher
+  RATE_LIMIT: RateLimit
 }
 
 /**

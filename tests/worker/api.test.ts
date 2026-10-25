@@ -53,8 +53,12 @@ const stored: Record<string, unknown> = {
   'sweep:state': { step: -1, probeAt: null, probeCursor: 3, refurbAt: '2026-08-27T18:00:00.000Z' },
 }
 
+/** A limiter that always admits, so routing tests see the real responses. */
+const admit = { limit: async () => ({ success: true }) }
+
 const env = {
   PRICES: { get: async (key: string) => stored[key] ?? null, put: async () => {} },
+  RATE_LIMIT: admit,
 } as unknown as Env
 
 const ctx = { waitUntil: () => {}, passThroughOnException: () => {} } as unknown as ExecutionContext
@@ -114,6 +118,7 @@ describe('GET /api/snapshot families', () => {
           key === 'snapshot:latest' ? { ...snapshot, families: [duo] } : stored[key] ?? null,
         put: async () => {},
       },
+      RATE_LIMIT: admit,
     } as unknown as Env
     const body: any = await worker
       .fetch(new Request('https://example.com/api/snapshot'), withFamilies, ctx)
@@ -132,9 +137,43 @@ describe('GET /api/snapshot families', () => {
 
 describe('an empty store', () => {
   it('says so rather than serving an empty catalogue', async () => {
-    const bare = { PRICES: { get: async () => null, put: async () => {} } } as unknown as Env
+    const bare = {
+      PRICES: { get: async () => null, put: async () => {} },
+      RATE_LIMIT: admit,
+    } as unknown as Env
     const response = await worker.fetch(new Request('https://example.com/api/snapshot'), bare, ctx)
 
     expect(((await response.json()) as any).error).toMatch(/No price data/)
   })
+})
+
+describe('the per-client rate limit', () => {
+  const keys: string[] = []
+  const deny = {
+    PRICES: {
+      get: async () => {
+        throw new Error('a denied request must not read KV')
+      },
+    },
+    RATE_LIMIT: {
+      limit: async ({ key }: { key: string }) => {
+        keys.push(key)
+        return { success: false }
+      },
+    },
+  } as unknown as Env
+
+  it.each(['/api/snapshot', '/api/status', '/api/history?family=f&config=c', '/mcp', '/llms.txt'])(
+    'answers 429 on %s once the client is over its limit, before any storage read',
+    async (path) => {
+      keys.length = 0
+      const request = new Request(`https://example.com${path}`, {
+        headers: { 'CF-Connecting-IP': '203.0.113.7' },
+      })
+      const response = await worker.fetch(request, deny, ctx)
+
+      expect(response.status).toBe(429)
+      expect(keys).toEqual(['203.0.113.7'])
+    },
+  )
 })
