@@ -7,6 +7,18 @@
   "workers_dev": false,
   "observability": { "enabled": true },
 
+  // Cost guard (ai-sdlc references/cloudflare.md). The heaviest request parses
+  // the ~8 MB KV snapshot: about 70 ms cold on a laptop, so 500 ms leaves room
+  // for slower edge hardware and still stops a runaway isolate.
+  // Worst request: 3 KV reads + 1 exchange-rate fetch + 1 KV write = 5; 10 leaves margin.
+  "limits": { "cpu_ms": 500, "subrequests": 10 },
+
+  // Per-client cap on everything that reaches the Worker (/api/*, /mcp, /llms.txt);
+  // static assets are served without it. Namespace 7001: eugnel-ltd repos use N001 blocks.
+  "ratelimits": [
+    { "name": "RATE_LIMIT", "namespace_id": "7001", "simple": { "limit": 120, "period": 60 } }
+  ],
+
   "routes": [{ "pattern": "apple-price-tracker.eugnel.com", "custom_domain": true }],
 
   "assets": {

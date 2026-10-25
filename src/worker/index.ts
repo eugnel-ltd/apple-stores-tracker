@@ -54,6 +54,15 @@ marks are trademarks of Apple Inc.
 
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Every request that reaches the Worker parses an ~8 MB snapshot or queries
+    // D1, so one client is capped before any storage read (wrangler.jsonc
+    // `ratelimits`, ai-sdlc Cloudflare cost guard).
+    const client = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+    const { success } = await env.RATE_LIMIT.limit({ key: client })
+    if (!success) {
+      return new Response('Too many requests', { status: 429, headers: { 'retry-after': '60' } })
+    }
+
     const url = new URL(request.url)
 
     if (url.pathname === '/mcp') {
