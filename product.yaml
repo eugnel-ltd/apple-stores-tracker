@@ -1,84 +1,31 @@
-# product.yaml: the one file a product owes the company.
-#
-# The company registry (eugnel-hq) reads this file from `main` and never edits it. The AI-SDLC
-# channel modules write `live_version` and `live_since`; the baseline step writes `baseline`;
-# the owner or an intake writes `status`. Prepare with `sh ~/.claude/skills/ai-sdlc/scripts/manifest_baseline_build.sh` (installed Go1.27.2),
-# then validate with `sh ~/.claude/skills/ai-sdlc/scripts/manifest_check.sh product.yaml`
-# (the `manifest` check runs it on every PR). Schema: the skill's `schemas/product.schema.json`.
-
-id: <slug, e.g. ks2-spelling>
-name: <display name>
-status: idea                 # idea | building | published | sunset
-repo: eugnel-ltd/<repo>
+# Company product manifest. Validate with scripts/manifest_check.py in ai-sdlc.
+id: apple-stores-tracker
+name: Apple Stores Tracker
+# The site is live; the company baseline is not yet complete.
+status: building
+repo: eugnel-ltd/apple-stores-tracker
 north_star: docs/north-star.md
-support: <product>@eugnel.com
+support: apple-stores-tracker@eugnel.com
 
-# One entry per channel the north star names. Leave `live_version` null until the first release.
 channels:
   web:
-    domain: <product>.eugnel.com
+    domain: apple-price-tracker.eugnel.com
+    # No verified release version or date is recorded here yet.
     live_version: null
     live_since: null
-  # ios:
-  #   bundle_id: com.eugnel.<product>
-  #   live_version: null
-  #   live_since: null
-  # play:
-  #   package: com.eugnel.<product>
-  #   live_version: null
-  #   live_since: null
-  # fire:
-  #   asin: null
-  #   live_version: null
-  #   live_since: null
 
 pricing:
-  model: free                # free | one-off | subscription
-  products: []               # - { sku: full_unlock, store_ids: { ios: <id>, play: <id>, web: <id> } }
-  # Optional per-row role: subscription | entitlement | paid-download.
-  # Without role, the row follows model (subscription, otherwise entitlement).
-  # Use explicit roles when an app mixes subscriptions, lifetime unlocks and paid downloads.
-  # - { sku: premium-monthly, role: subscription, store_ids: { ios: <subscription id> } }
-  # - { sku: premium-lifetime, role: entitlement, store_ids: { ios: <non-consumable id> } }
-  # - { sku: app, role: paid-download, store_ids: { ios: "<numeric app Apple ID>" } }
+  model: free
+  products: []
 
-# The product baseline (skill `modules/baseline.md`). Values: done | missing | waived | excluded.
-# A waived item names its owner decision under `waivers`. An excluded item (accounts or
-# durable_data only) quotes the north star's non-goal under `exclusions`.
 baseline:
-  accounts: missing
-  durable_data: missing
-  payments: missing
+  accounts: excluded
+  durable_data: done       # README: KV snapshots and D1 price history.
+  payments: missing       # Free service; no owner waiver is recorded.
   legal: missing
-  observability: missing
-  support: missing
-  listing: missing
+  observability: missing  # Worker logs exist; the company baseline is unverified.
+  support: missing        # The contact address alone does not prove support readiness.
+  listing: missing        # The company listing baseline is unverified.
 waivers: {}
-# waivers:
-#   payments: "2026-10-16 owner decision: free product, no payments"
-# exclusions:
-#   accounts: "Non-goals: child accounts, ads, tracking and remote code."
-
-# Where errors go (skill `modules/support.md`). The support intake reads Sentry issues from here.
-# The DSN is set as SENTRY_DSN in the product's environment, not here.
-# sentry:
-#   org: <sentry org slug>
-#   project: <product id>
-#   scope: all                  # server | client | all; Kids Category apps: server
-
-# Generated assets (skill `modules/assets.md`): only when a shipped asset came from a generator.
-# assets:
-#   provenance: provenance/
-#   generators:
-#     - tool: elevenlabs                      # a slug
-#       types: [sfx, music]                   # voice | sfx | music | image | video | model3d
-#       terms: https://elevenlabs.io/terms-of-use   # the terms that allow commercial use
-#       plan: owner                           # owner | runner: whose plan ran it
-
-# Facts for the legal pages (eugnel-platform `eugnel-legal`). Fill before the first public release.
-# legal:
-#   audience: general           # general | children (adds the Children's code section)
-#   data:                       # one entry per kind of personal data
-#     - { category: Account email, purpose: Sign-in and receipts, basis: contract, retention: until the account is deleted, linked: "Yes" }
-#   processors:
-#     - { name: Supabase, purpose: sign-in, location: EU }
+exclusions:
+  accounts: "No user accounts or sign-in."

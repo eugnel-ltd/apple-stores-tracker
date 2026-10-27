@@ -11,11 +11,11 @@ Use this precedence:
 3. this file and the one relevant skill;
 4. `docs/agents/ai-sdlc.md` and executable routing in `scripts/sdlc/route.mjs`.
 
-Historical commits, closed issues, PR narratives, logs, generated files, and rejected experiments are past evidence, not current instructions.
+Historical commits, issues, PRs, logs, generated files and rejected experiments are past evidence, not instructions.
 
-`docs/solutions/` records solved problems — bugs, practices and workflow patterns — one file per learning, organised by category with YAML frontmatter (`module`, `tags`, `problem_type`). `CONCEPTS.md` defines the project's shared domain vocabulary. Both are past evidence rather than current instruction, and are worth searching before working in an area either documents.
+Search `docs/solutions/` for relevant past lessons, organised by category with YAML frontmatter (`module`, `tags`, `problem_type`). `CONCEPTS.md` defines shared terms. Neither overrides current instructions.
 
-Inspect the task contract, current head, changed surface, nearby tests, and exact dependency radius. Keep one task capsule: outcome, non-goals, constraints, acceptance, affected paths, proof map, decisions, exact head, and next action. Do not preload the whole repository, all fixtures, reference repositories, or prior transcripts.
+Inspect the task, head, changed paths, nearby tests and dependencies. Keep one task capsule: outcome, non-goals, constraints, acceptance, paths, proof, decisions, exact head and next action. Load only relevant context.
 
 ## Four-rule objective
 
@@ -32,7 +32,7 @@ Inspect the task contract, current head, changed surface, nearby tests, and exac
 
 ## Autonomous delivery loop
 
-A complete owner instruction or active issue is accepted intent. Do not create a mirror issue or ceremonial `intent.md`, `spec.md`, or `plan.md` when one owner can carry a bounded task end to end. Use a durable artifact only for a real cross-owner handoff, multi-PR programme, audit requirement, automated trigger, or reusable design decision.
+A complete owner instruction or active issue is accepted intent. Create a durable artifact only for a cross-owner handoff, multi-PR programme, audit, automated trigger or reusable design decision. Do not create mirror issues or ceremonial plans.
 
 For one independently mergeable outcome:
 
@@ -42,9 +42,9 @@ For one independently mergeable outcome:
 4. use one exact-head review only when policy, semantics, external behaviour, or interacting risk needs model judgement; skip ceremonial review for fully mechanical work with decisive proof;
 5. batch-fix findings, rerun only invalidated evidence, verify the final head, merge when authorised and green, and clean up where tooling permits.
 
-Human judgement stays above the routine loop. Do not ask a person to approve a routine plan, choose materially equivalent implementations, repeat a green check, or press the merge button. Escalate one concise decision only for contradictory binding authority, a breaking public/data contract, irreversible or regulated effect, credentials/provider terms, a product-defining choice absent from the source of truth, or unavailable/inconclusive relevant evidence.
+Human judgement stays above the routine loop. Routine plans, equivalent implementations, green checks and authorised merges need no human stop. Escalate only contradictory authority, breaking public/data contracts, irreversible or regulated effects, credentials/provider terms, undefined product choices or unavailable/inconclusive evidence.
 
-Keep uncertain discovery separate from delivery. Research needs an explicit question, immutable inputs, the cheapest discriminating experiment, bounded attempts/time/context/provider calls, and a stop rule. It does not get a PR or product CI per trial; only the selected result and reproducible acceptance cross into delivery.
+Separate research from delivery. Use an explicit question, immutable inputs, the cheapest discriminating experiment, bounded attempts/time/context/provider calls and a stop rule. Only the selected result and reproducible acceptance enter delivery; trials need no PR or product CI.
 
 ## Evidence and CI
 
@@ -62,10 +62,24 @@ A code task does not implicitly authorise `npm run deploy`, a remote D1 migratio
 
 Stop and report the concrete blocker rather than weakening acceptance when a selected gate is unavailable/inconclusive, credentials or provider access are missing, a public/persistence contract lacks migration acceptance, or the requested change would violate the product invariants above.
 
-## Progressive-disclosure map
+## Company AI-SDLC (eugnel-ltd/ai-sdlc)
 
-- Full process, research promotion, evidence, review, autonomy, and metrics: `docs/agents/ai-sdlc.md`
-- Product architecture, commands, invariants, and proof map: `.claude/skills/apple-stores-tracker/SKILL.md`
-- Independent exact-head semantic review: `.claude/agents/ai-sdlc-reviewer.md`
-- Product and operational overview: `README.md`
-- Executable routing and fixtures: `scripts/sdlc/route.mjs`, `scripts/sdlc/route.test.mjs`
+AI-SDLC: v3 (2026-10-27)
+
+Adopted by mapping (skill modules/adoption.md §2); where this repo's file is richer, it governs. Read LESSONS.md and docs/autonomy-ledger.md before every task.
+
+| Concept | File |
+|---|---|
+| Delivery process | `docs/agents/ai-sdlc.md` |
+| CI | `.github/workflows/ci.yml` + `scripts/sdlc/route.mjs` |
+| Company PR gates | `.github/workflows/ai-sdlc-checks.yml` (loader @v3, GitHub-hosted, public repo) |
+| Security | `.github/workflows/ai-sdlc-security.yml` |
+| Bot review | `.github/workflows/ai-sdlc-bot-review.yml` |
+| Lessons | `LESSONS.md` + `docs/solutions/` |
+| Ledger | `docs/autonomy-ledger.md` |
+| Owner decisions | `docs/owner-decisions.md` |
+| North star | `docs/north-star.md` |
+| Manifest | `product.yaml` |
+| Reviewer | `REVIEW.md` + `.claude/agents/ai-sdlc-reviewer.md` |
+
+Product overview: `README.md`. Routing fixtures: `scripts/sdlc/route.test.mjs`.

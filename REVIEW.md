@@ -1,16 +1,18 @@
 # REVIEW.md
 
-What the independent reviewer checks on every PR. The reviewer reads this file first, then uses the AI-SDLC review prompt (`references/review-prompt.md`). Changed by PR.
+What the independent reviewer checks on every PR. The reviewer reads this file first, then uses the repository semantic reviewer prompt (`.claude/agents/ai-sdlc-reviewer.md`). Changed by PR.
 
 ## Reviewer
 
-- Primary: codex `<model>`, read-only: no file edits, no state-changing git commands, no network writes.
-- Fall-backs when the primary's quota is spent or it cannot sign in, in order: `<Grok Build, Cursor CLI, Claude Code (claude-team, never for Claude-written work), Antigravity CLI>`.
-- Last resort: a Claude subagent in a fresh context. The PR says so, and the task type cannot merge above level 2 on that review.
+- Primary: codex (OpenAI) when OpenAI did not write the PR. Use a vendor reviewer from a company that did not write any part of the PR. Review read-only: no file edits, state-changing git commands or network writes.
+- Fall-backs when the primary wrote the PR or is unavailable: Grok (xAI), Cursor (Cursor), then Claude (Anthropic). Skip every company that wrote any part of the PR. Record the reviewer vendor and fall-back reason.
+- If no independent vendor is available, hold and report the blocker.
 
 <!-- Every open PR needs a reviewer vendor that differs from every writer (modules/review.md, Reviewer vendor). The optional line `Reviewer vendor: distinct from every writer since YYYY-MM-DD` at column 0 only sets the date from which release replay of merged PRs applies that rule. -->
 
 Findings P0–P3, each with `file:line`, posted on the PR as a comment with `VERDICT:` and `Reviewed head: <sha>` lines. Re-reviews cover only the fix diff.
+
+Use `docs/agents/ai-sdlc.md` for process and `package.json` for commands: `npm run ci`, `npm test`, `npm run build`, `npm run check:governance`.
 
 ## Passes
 
@@ -18,7 +20,7 @@ Run all three, in order, against the PR's diff:
 
 1. **Bugs and logic:** correctness on real inputs (empty and missing values, boundaries, time zones, encodings, concurrency, retries), failure behaviour when a dependency is down or wrong, silent failures, and whether the regression test really fails on the old code.
 2. **Security:** secrets, injection, authorisation, untrusted input, new dependencies. Check every added or changed `.secret-scan-allow` line against its upstream source: the listed file must be the published package file and the matched text must be code, not a key. A real key never gets a line. A PR that lists a file without a verifiable upstream source fails this security pass.
-3. **Compliance:** the diff against the issue, the spec and plan when present, `docs/code-standards.md`, `docs/owner-decisions.md` and `docs/north-star.md`. A diff that departs from the plan without an update to the plan fails this pass. A diff that spends money without an `Expenditure:` decision fails this pass.
+3. **Compliance:** the diff against the issue, the spec and plan when present, `docs/agents/ai-sdlc.md`, `docs/owner-decisions.md` and `docs/north-star.md`. A diff that departs from the plan without an update to the plan fails this pass. A diff that spends money without an `Expenditure:` decision fails this pass.
 
 - Cloudflare: D1 queries that can return many rows have `LIMIT`; no D1 query inside a loop over rows or requests (use one statement or `db.batch()`); Pages Functions write or paid-API endpoints are rate-limited. See `modules/autonomy.md`, "Cloudflare cost guard".
 
@@ -41,7 +43,7 @@ Do not review:
 
 ## Doc-only fast lane
 
-A diff takes the doc-only fast lane when it changes nothing that runs, is copied, or is read as an instruction. In: `README.md`, `LESSONS.md`, `docs/solutions/`, `docs/metrics.md`, and prose under `docs/` that no agent or tool acts on. Out, always the full lane: `AGENTS.md`, `CLAUDE.md`, `REVIEW.md`, `docs/code-standards.md`, `docs/owner-decisions.md`, `docs/autonomy-ledger.md`, `docs/north-star.md`, `docs/plans/TEMPLATE.md`, skills, modules, prompts, agent definitions, hooks, workflows, scripts, templates of any kind, configuration, code and tests. The lane gets the compliance pass and the writing check (`modules/writing.md`). No regression test is required.
+A diff takes the doc-only fast lane when it changes nothing that runs, is copied, or is read as an instruction. In: `README.md`, `LESSONS.md`, `docs/solutions/`, `docs/metrics.md`, and prose under `docs/` that no agent or tool acts on. Out, always the full lane: `AGENTS.md`, `CLAUDE.md`, `REVIEW.md`, `docs/agents/ai-sdlc.md`, `docs/owner-decisions.md`, `docs/autonomy-ledger.md`, `docs/north-star.md`, `docs/plans/TEMPLATE.md`, skills, modules, prompts, agent definitions, hooks, workflows, scripts, templates of any kind, configuration, code and tests. The lane gets the compliance pass and the writing check (`modules/writing.md`). No regression test is required.
 
 ## Human review required
 

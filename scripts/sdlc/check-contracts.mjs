@@ -24,7 +24,7 @@ const claude = read('CLAUDE.md')
 const sdlc = read('docs/agents/ai-sdlc.md')
 const skill = read('.claude/skills/apple-stores-tracker/SKILL.md')
 const reviewer = read('.claude/agents/ai-sdlc-reviewer.md')
-const workflow = read('.github/workflows/ai-sdlc.yml')
+const workflow = read('.github/workflows/ci.yml')
 const route = read('scripts/sdlc/route.mjs')
 const routeTest = read('scripts/sdlc/route.test.mjs')
 const template = read('.github/pull_request_template.md')
@@ -80,7 +80,7 @@ requireText('scripts/sdlc/route.test.mjs', routeTest, [
   'renaming production code to Markdown cannot hide the deletion',
   'empty or unresolved input fails closed to full',
 ])
-requireText('.github/workflows/ai-sdlc.yml', workflow, [
+requireText('.github/workflows/ci.yml', workflow, [
   'pull_request:',
   'push:',
   'workflow_dispatch:',

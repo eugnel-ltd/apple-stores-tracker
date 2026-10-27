@@ -20,7 +20,7 @@ test('code, config, workflow, fixture, or mixed changes select full', () => {
   for (const paths of [
     ['src/worker/index.ts'],
     ['package.json'],
-    ['.github/workflows/ai-sdlc.yml'],
+    ['.github/workflows/ci.yml'],
     ['tests/fixtures/provider.json'],
     ['src/runtime.md'],
     ['README.md', 'src/shared/convert.ts'],

@@ -6,8 +6,8 @@
 # on every run while the PR is open, including runs started by a comment) and the jobs owner-decisions, locked-tests,
 # secret-scan and manifest. Protect .github/workflows/ and .ai-sdlc/ with CODEOWNERS.
 # The loader is public; no reusable-workflow access setting is needed.
-# Runner: self-hosted by owner decision (no paid Actions minutes); the runner holds git, gh and sh.
-# Pass runs_on to use other labels.
+# This repo is public: the loader runs its jobs on GitHub-hosted ubuntu-24.04.
+# The comment-filter runs on ubuntu-latest, so no job reaches a self-hosted runner.
 name: AI-SDLC checks
 
 on:
@@ -58,7 +58,7 @@ jobs:
       ((github.event.comment.author_association == 'CONTRIBUTOR' ||
       github.event.comment.author_association == 'NONE') &&
       !endsWith(github.event.comment.user.login, '[bot]')))
-    runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
     permissions: {}
     timeout-minutes: 2
     outputs:
@@ -94,5 +94,5 @@ jobs:
     uses: eugnel-ltd/ai-sdlc-loader/.github/workflows/checks.yml@v3
     with:
       base: main
-      runs_on: '["self-hosted", "linux"]'
+      runs_on: '["ubuntu-latest"]'
       # test_paths: "tests/ :(glob)**/test_*.py"

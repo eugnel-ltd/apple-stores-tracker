@@ -4,7 +4,7 @@ Short live log of repeatable mistakes. Read it before every task. At most fiftee
 
 - Add an entry as soon as a review finding, revert, follow-up fix, failed CI run, rework or incident shows a repeatable mistake. Add one at once when an agent makes the same mistake twice.
 - The nightly audit bumps `Seen` (one count per day), merges duplicates, deletes obsolete entries and moves overflow to `docs/solutions/`.
-- A lesson seen on three different days moves by PR into `docs/code-standards.md` as a hard rule and leaves this file.
+- A lesson seen on three different days moves by PR into `docs/agents/ai-sdlc.md` as a hard rule and leaves this file.
 
 Entry format (newest first):
 
@@ -15,5 +15,7 @@ Entry format (newest first):
 - Done right: <what the correct approach looks like>
 - Seen: 1× (YYYY-MM-DD)
 ```
+
+Commands live in `package.json`: `npm run ci`, `npm test`, `npm run build`, `npm run check:governance`.
 
 ## Entries

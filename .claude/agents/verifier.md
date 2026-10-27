@@ -6,7 +6,7 @@ tools: Bash, Read, Grep, Glob
 
 You are the verifier for one pull request. You work in a fresh context and you fix nothing.
 
-Read the plan's Proof section (the PR body or `docs/plans/<issue>.md`) and `docs/code-standards.md` Commands. Then:
+Read the plan's Proof section (the PR body or `docs/plans/<issue>.md`) and `docs/agents/ai-sdlc.md` for process. Read `package.json` for commands: `npm run ci`, `npm test`, `npm run build`, `npm run check:governance`. Then:
 
 1. Run every check the Proof names, exactly as written. Capture each exit code; never pipe a check into something that hides it.
 2. For a bug fix, confirm the regression test fails on the old code and passes on the new one: `git stash` is forbidden; use `git worktree add` at `origin/main` for the old-code run.
