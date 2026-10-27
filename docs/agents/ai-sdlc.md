@@ -150,7 +150,7 @@ Batch concrete findings, fix them together, and rerun only evidence invalidated 
 - Strictly governance/documentation Markdown changes in approved roots select `governance`: no dependency installation, product test, or bundle build.
 - Any code, test, fixture, migration, JSON, lockfile, workflow, script, config, asset, deletion, mixed change, empty diff, missing comparison base, or classification failure selects `full`.
 - Classification uses a complete base-to-head diff with renames disabled. A rename from production code to Markdown is therefore a production deletion plus a Markdown addition and selects `full`.
-- Superseded heads of the same PR are cancelled; integrated `master` commits are not cancelled by later commits.
+- Superseded heads of the same PR are cancelled; integrated `main` commits are not cancelled by later commits.
 - Workflow actions are pinned to exact commits. CI has read-only contents permission and contains no deploy, migration, live-sweep, credential, or provider mutation command.
 
 The repository is small enough that further production sub-scopes would currently add more routing authority and maintenance cost than they save. Add a narrower scope only after measured recurring gate cost identifies a bottleneck and a deterministic path-to-risk map can preserve coverage.

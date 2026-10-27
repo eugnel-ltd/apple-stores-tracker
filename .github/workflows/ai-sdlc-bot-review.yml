@@ -1,0 +1,30 @@
+# Thin caller for the formal bot review. Copy to .github/workflows/ai-sdlc-bot-review.yml.
+# The public loader at v3 serves the review scripts from the signed gate bundle.
+# The eugnel-ai-sdlc-gates App posts the formal review on each open fol2 PR head from the merge
+# gate result. It never approves its own PRs and never merges; the guarded auto_merge.sh merges.
+# The gate trusts a reviewer by live write access to this repo (ai-sdlc #783).
+# The job reads head checks with its own read-only token. The one-hour App token from the
+# gate broker for this caller and repo has contents: read and pull_requests: write (ai-sdlc #785).
+# No PAT and no repository secret.
+# The broker serves schedule and workflow_dispatch on main only; the schedule picks up new heads.
+name: Bot review
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+  checks: read
+  statuses: read
+  actions: read
+  id-token: write
+
+jobs:
+  review:
+    uses: eugnel-ltd/ai-sdlc-loader/.github/workflows/bot-review.yml@v3
+    with:
+      authors: fol2

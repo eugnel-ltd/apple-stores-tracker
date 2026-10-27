@@ -1,0 +1,31 @@
+# Company product manifest. Validate with scripts/manifest_check.py in ai-sdlc.
+id: apple-stores-tracker
+name: Apple Stores Tracker
+# The site is live; the company baseline is not yet complete.
+status: building
+repo: eugnel-ltd/apple-stores-tracker
+north_star: docs/north-star.md
+support: apple-stores-tracker@eugnel.com
+
+channels:
+  web:
+    domain: apple-price-tracker.eugnel.com
+    # No verified release version or date is recorded here yet.
+    live_version: null
+    live_since: null
+
+pricing:
+  model: free
+  products: []
+
+baseline:
+  accounts: excluded
+  durable_data: done       # README: KV snapshots and D1 price history.
+  payments: missing       # Free service; no owner waiver is recorded.
+  legal: missing
+  observability: missing  # Worker logs exist; the company baseline is unverified.
+  support: missing        # The contact address alone does not prove support readiness.
+  listing: missing        # The company listing baseline is unverified.
+waivers: {}
+exclusions:
+  accounts: "No user accounts or sign-in."
