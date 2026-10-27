@@ -72,6 +72,7 @@ Adopted by mapping (skill modules/adoption.md §2); where this repo's file is ri
 |---|---|
 | Delivery process | `docs/agents/ai-sdlc.md` |
 | CI | `.github/workflows/ci.yml` + `scripts/sdlc/route.mjs` |
+| Cloud CI entry point | `scripts/ci.sh` |
 | Company PR gates | `.github/workflows/ai-sdlc-checks.yml` (loader @v3, GitHub-hosted, public repo) |
 | Security | `.github/workflows/ai-sdlc-security.yml` |
 | Bot review | `.github/workflows/ai-sdlc-bot-review.yml` |
