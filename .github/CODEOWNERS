@@ -1,0 +1,6 @@
+# No path is owner-only. Owner, 25 Oct 2026 (ai-sdlc #632): "632 I need only 1 vender reviewer. Do
+# not over gate. The owner merge is as least as possible." Only expenditure stays with the owner,
+# and no file needs a code owner for it. The merge tiers in ai-sdlc modules/ci.md R19 guard the paths
+# this file used to list: workflows and the bot-review script are gate tier (one independent
+# reviewer company); this file and rulesets are two-review tier (two companies). Add a repo's own
+# owners below this comment only by the owner's decision.

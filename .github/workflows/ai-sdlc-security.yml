@@ -1,0 +1,23 @@
+# Thin caller for the AI-SDLC weekly security scan. Copy to .github/workflows/ai-sdlc-security.yml.
+# Free tools on a self-hosted runner with Homebrew and python3; each run writes one digest issue
+# labelled security-finding, edited in place while open. Allowlist a confirmed false positive in
+# .gitleaks.toml or .gitleaksignore; closing the digest dismisses what it lists.
+name: AI-SDLC weekly security
+
+on:
+  schedule:
+    - cron: "30 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  # The loader's jobs get an OIDC token for the gate broker (ai-sdlc #731).
+  id-token: write
+
+jobs:
+  security:
+    # timeout-minutes: set on each job of the called workflow; GitHub rejects it on a caller job.
+    uses: eugnel-ltd/ai-sdlc-loader/.github/workflows/security.yml@v3
+    with:
+      runs_on: '["self-hosted", "macos"]'
