@@ -6,8 +6,9 @@
 # on every run while the PR is open, including runs started by a comment) and the jobs owner-decisions, locked-tests,
 # secret-scan and manifest. Protect .github/workflows/ and .ai-sdlc/ with CODEOWNERS.
 # The loader is public; no reusable-workflow access setting is needed.
-# This repo is public: the loader runs its jobs on GitHub-hosted ubuntu-24.04.
-# The comment-filter runs on ubuntu-latest, so no job reaches a self-hosted runner.
+# The loader ignores the runs_on value below.
+# It runs its jobs on GitHub-hosted ubuntu-24.04 because this repo is public.
+# The comment-filter job runs on ubuntu-latest.
 name: AI-SDLC checks
 
 on:

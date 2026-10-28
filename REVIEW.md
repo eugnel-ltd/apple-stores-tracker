@@ -32,14 +32,19 @@ Run all three, in order, against the PR's diff:
 
 ## What failure looks like
 
-<One or two lines per area: how a bad change shows itself in this repo, so the reviewer looks there first. For example: docs, "it lies"; configuration, "it misroutes"; payments, "a charge without an entitlement".>
+- Price comparison: a comparison row mixes unlike configurations, loses its stable `configKey`, or drops source URL, market, store or currency provenance.
+- Scraping: collection hits Apple or eBay harder, weakens `RequestBudget` or shared throttling, or silently drops partial errors.
+- Data: a change rewrites an applied D1 migration, omits `LIMIT` from a D1 query that can return many rows, queries D1 inside a loop, or breaks the KV snapshot shape.
+- Refund trust: an estimate presents uncertain participation by Apple's own stores as a confident refund claim.
+- Worker/MCP API: a contract change breaks callers of the Worker's HTTP API or read-only MCP tools.
+- Docs and agent files: it lies when a rule or command does not match the code.
 
 ## Exclusions
 
 Do not review:
 
-- generated files, lockfiles and vendored code: `<paths>`;
-- anything CI already enforces (formatting, lint, type checks): `<checks>`.
+- the generated lockfile: `package-lock.json`;
+- checks CI already enforces: the governance contract (`npm run check:governance`); on the full route, the Vitest suite (`npm test`) and TypeScript type checks (`tsc -b` in `npm run build`).
 
 ## Doc-only fast lane
 
@@ -50,7 +55,6 @@ A diff takes the doc-only fast lane when it changes nothing that runs, is copied
 Paths that get the full review lane and extra care. A PR that touches them merges at its type's level and the digest names it; it does not wait for the owner (AI-SDLC `modules/autonomy.md`).
 
 - `docs/owner-decisions.md`: the owner (append-only; CI checks it).
-- `<path>`: `<owner>`
 
 ## Separation of duties
 
