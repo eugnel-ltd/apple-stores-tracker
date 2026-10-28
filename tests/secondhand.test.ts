@@ -278,6 +278,17 @@ describe('secondHandFor', () => {
     expect(new Set(earlierGeneration!.listings.map((l) => l.model))).toEqual(new Set(['iphone16']))
   })
 
+  it.each(['iphone-18.*', 'iphone-18-pro|iphone16', 'iphone-18e$', 'iphone-18[0-9]'])(
+    'rejects regex syntax in the family id %s',
+    (familyId) => {
+      expect(refurbCategoryFor(familyId)).toBeNull()
+      expect(refurbStockFor(familyId, listings)).toBe(0)
+      const result = secondHandFor(offer(familyId, [['dimensionCapacity', '128gb']]), listings)
+      expect(result.thisGeneration).toBeNull()
+      expect(result.earlierGeneration).toBeNull()
+    },
+  )
+
   it('derives a Pro suffix from the family id the same way', () => {
     const pro = {
       partNumber: 'X17PRO/A',
