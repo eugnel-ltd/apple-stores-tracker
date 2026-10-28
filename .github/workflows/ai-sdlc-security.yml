@@ -1,5 +1,6 @@
 # Thin caller for the AI-SDLC weekly security scan. Copy to .github/workflows/ai-sdlc-security.yml.
-# The loader runs on GitHub-hosted ubuntu-24.04 because this repo is public.
+# The loader ignores the runs_on value below.
+# It runs its jobs on GitHub-hosted ubuntu-24.04 because this repo is public.
 # Each run writes one digest issue labelled security-finding, edited in place while open.
 # Allowlist a confirmed false positive in .gitleaks.toml or .gitleaksignore; closing the digest dismisses what it lists.
 name: AI-SDLC weekly security
