@@ -4,7 +4,7 @@ How far each task type runs by itself. The orchestrator reads this before every 
 
 Levels: 0 Propose · 1 Draft (open the PR) · 2 Merge · 3 Release (deploy, production and store submissions included, verify, roll back) · 4 Initiate (start work from the north star or a monitor).
 
-Enforcement status: `<not yet green | green since YYYY-MM-DD, PR #n>`. Levels 3 and 4 need green.
+Enforcement status: `green since 2026-10-28, PR #26` on the GitHub Free basis (ai-sdlc `modules/enforcement.md`, Green on GitHub Free). The AI-SDLC checks run on every PR since the adoption PR #24 (`.github/workflows/ai-sdlc-checks.yml`, loader at v3). From #26 on, every commit on `main` is the merge of a PR whose final head has an independent APPROVE naming it (`ai-sdlc/review-on-head` success) and every AI-SDLC check green: #26 (`b286b3e`), #27 (`47385f5`) and #28 (`b0dc0f4`) were checked on 29 Oct 2026. A release here is `npm run deploy` of the Worker (`package.json`). Before it, ai-sdlc `scripts/release_evidence.sh` runs over every commit since #26, including the commit that turned this line green; one commit without that evidence holds the release. Levels 3 and 4 need green.
 
 | Task type | Level | Clean streak | Last change | Evidence |
 |---|---|---|---|---|
