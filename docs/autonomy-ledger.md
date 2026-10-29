@@ -4,7 +4,9 @@ How far each task type runs by itself. The orchestrator reads this before every 
 
 Levels: 0 Propose · 1 Draft (open the PR) · 2 Merge · 3 Release (deploy, production and store submissions included, verify, roll back) · 4 Initiate (start work from the north star or a monitor).
 
-Enforcement status: `green since 2026-10-28, PR #26` on the GitHub Free basis (ai-sdlc `modules/enforcement.md`, Green on GitHub Free). The AI-SDLC checks run on every PR since the adoption PR #24 (`.github/workflows/ai-sdlc-checks.yml`, loader at v3). From #26 on, every commit on `main` is the merge of a PR whose final head has an independent APPROVE naming it (`ai-sdlc/review-on-head` success) and every AI-SDLC check green: #26 (`b286b3e`), #27 (`47385f5`) and #28 (`b0dc0f4`) were checked on 29 Oct 2026. A release here is `npm run deploy` of the Worker (`package.json`). Before it, ai-sdlc `scripts/release_evidence.sh` runs over every commit since #26, including the commit that turned this line green; one commit without that evidence holds the release. Levels 3 and 4 need green.
+Enforcement status: `not yet green` (ai-sdlc `modules/enforcement.md`, Green on GitHub Free). Levels 3 and 4 need green.
+
+Two of the three conditions hold. The AI-SDLC checks have run on every PR since the adoption PR #24 (`.github/workflows/ai-sdlc-checks.yml`, loader at v3), and every merge from #26 on had an independent APPROVE naming its final head (`ai-sdlc/review-on-head` success) and every check green: #26 (`b286b3e`), #27 (`47385f5`) and #28 (`b0dc0f4`), read on 29 Oct 2026. The third does not: the release lane, `npm run deploy` (`npm run build && wrangler deploy`), runs no `release_evidence.sh`, so nothing stops a deploy of an unreviewed commit. Green needs a guarded release command (for example `npm run release`, as RealTimeTranslation's `scripts/web-release.py`) that runs ai-sdlc `scripts/release_evidence.sh` over every commit since the line turns green and refuses on a hold, run where that script can read collaborator permissions (a Claude cloud session cannot: the proxy refuses that path).
 
 | Task type | Level | Clean streak | Last change | Evidence |
 |---|---|---|---|---|
