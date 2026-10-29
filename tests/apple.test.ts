@@ -7,6 +7,7 @@ import {
   extractJsonAfter,
   isExcludedDimension,
   parseCatalogOffers,
+  parseFamilyName,
   parseFamilyStructure,
   parseVariantPricing,
 } from '../src/scrape/apple'
@@ -389,5 +390,53 @@ describe('a market that prices an option the catalogue does not carry', () => {
     expect(offer.dimensions).toEqual([
       { field: 'dimensionCapacity', value: '256gb', label: '256 GB' },
     ])
+  })
+})
+
+
+describe('parseFamilyName', () => {
+  it('uses the ProLED name Apple writes rather than guessing from its slug', () => {
+    expect(parseFamilyName(fixture('apple-uk-macbook-pro-proled-xdr-select.html')))
+      .toBe('MacBook Pro with PROLED XDR Display')
+  })
+
+  it('keeps the HomeView name when Apple omits the leading Buy', () => {
+    expect(parseFamilyName(fixture('apple-uk-apple-homeview-select.html'))).toBe('Apple HomeView')
+  })
+
+  it('decodes entities and collapses whitespace before removing the shop wrapper', () => {
+    expect(parseFamilyName('<title> Buy&nbsp;Apple &amp; Herm&egrave;s &#8212; &#x58;DR  - Apple (UK) </title>'))
+      .toBe('Apple & Hermès — XDR')
+    expect(parseFamilyName('<TITLE>Buy Apple &quot;Home&quot; - Apple</TITLE>')).toBe('Apple "Home"')
+  })
+
+  it('returns no replacement for absent or empty titles', () => {
+    for (const html of ['', '<title>  &nbsp; </title>', '<title>Buy - Apple (UK)</title>']) {
+      expect(parseFamilyName(html)).toBeUndefined()
+    }
+  })
+})
+
+describe('new selector options and families', () => {
+  it('prices HomeView as one UK retail catalogue configuration at £299', () => {
+    const family = { id: 'apple-homeview', categoryId: 'tv-home', name: 'Apple HomeView', route: '/shop/buy-home/apple-homeview' }
+    const html = fixture('apple-uk-apple-homeview-select.html')
+    const structure = parseFamilyStructure(html, family)
+    expect(structure.kind).toBe('catalog')
+    expect(structure.dimensions).toEqual([])
+    const offers = parseCatalogOffers(html, uk, family, structure)
+    expect(offers).toHaveLength(1)
+    expect(offers[0]).toMatchObject({
+      familyId: 'apple-homeview', marketId: 'uk', store: 'retail', amount: 299, currency: 'GBP',
+      sourceUrl: 'https://www.apple.com/uk/shop/buy-home/apple-homeview',
+    })
+  })
+
+  it('discovers 512GB memory on the Mac Studio without a code change', () => {
+    const family = FAMILIES.find((family) => family.id === 'mac-studio')!
+    const structure = parseFamilyStructure(fixture('apple-uk-mac-studio-select.html'), family)
+    expect(structure.kind).toBe('cto')
+    expect(structure.dimensions.find((dimension) => dimension.field === 'memory-dimensionMemory')?.values)
+      .toContainEqual({ field: 'memory-dimensionMemory', value: '512gb', label: '512GB' })
   })
 })

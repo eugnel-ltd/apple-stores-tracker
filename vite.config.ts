@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { CATEGORIES, FAMILIES } from './src/shared/families.ts'
+import { categoriesOf, familiesOf } from './src/shared/families.ts'
 import { BASE_CURRENCY, MARKETS } from './src/shared/markets.ts'
 import { REFUND_POLICIES } from './src/shared/refunds.ts'
 
@@ -25,8 +25,8 @@ function localSnapshot(): Plugin {
               collectedAt: local.collectedAt,
               baseCurrency: BASE_CURRENCY,
               markets: MARKETS,
-              categories: CATEGORIES,
-              families: local.families ?? FAMILIES,
+              categories: categoriesOf(local),
+              families: familiesOf(local),
               refunds: REFUND_POLICIES,
               fx: local.fx,
               refurb: local.refurb ?? null,

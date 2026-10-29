@@ -1,12 +1,6 @@
-import { type Family } from '../shared/families'
+import { CATEGORIES, nameFromSlug, type Category, type Family } from '../shared/families'
 
-/**
- * Apple's shop category slug → our category id.
- *
- * TV & Home is split across `buy-tv` and `buy-homepod` on the store, and both
- * map here. Anything else (`buy_accessories`, a nav index with no family) is
- * not a family.
- */
+/** Aliases keep history and reader URLs stable when Apple moves a department. */
 const SHOP_TO_CATEGORY: Record<string, string> = {
   mac: 'mac',
   ipad: 'ipad',
@@ -14,6 +8,7 @@ const SHOP_TO_CATEGORY: Record<string, string> = {
   watch: 'watch',
   vision: 'vision',
   airpods: 'airpods',
+  home: 'tv-home',
   homepod: 'tv-home',
   tv: 'tv-home',
 }
@@ -24,52 +19,49 @@ const FURNITURE = new Set([
   'accessories',
   'compare',
   'gift-cards',
+  'giftcards',
+  'accessory',
+  'tradein',
   'financing',
   'trade-in',
   'browse',
   'shop',
 ])
 
-const TOKEN_NAME: Record<string, string> = {
-  macbook: 'MacBook',
-  mac: 'Mac',
-  mini: 'mini',
-  imac: 'iMac',
-  ipad: 'iPad',
-  iphone: 'iPhone',
-  airpods: 'AirPods',
-  homepod: 'HomePod',
-  apple: 'Apple',
-  watch: 'Watch',
-  hermes: 'Hermès',
-  se: 'SE',
-  xdr: 'XDR',
-  tv: 'TV',
-  '4k': '4K',
-  pro: 'Pro',
-  air: 'Air',
-  max: 'Max',
-  neo: 'Neo',
-  studio: 'Studio',
-  display: 'Display',
-  ultra: 'Ultra',
-  vision: 'Vision',
-  duo: 'Duo',
+export interface ShopCategory extends Category {
+  shopSlugs: string[]
 }
 
-const nameFromSlug = (id: string): string =>
-  id
-    .split('-')
-    .map((part) => {
-      if (TOKEN_NAME[part]) return TOKEN_NAME[part]
-      if (/^\d/.test(part)) return part
-      return part.charAt(0).toUpperCase() + part.slice(1)
-    })
-    .join(' ')
+const categoryOfShop = (shop: string): string =>
+  Object.hasOwn(SHOP_TO_CATEGORY, shop) ? SHOP_TO_CATEGORY[shop] : shop
+
+/**
+ * Only category-level links introduce departments. Product cards and store
+ * furniture also link into the shop, but must not become extra categories.
+ */
+export function parseShopCategories(html: string): ShopCategory[] {
+  const categories = new Map<string, ShopCategory>()
+  const links = /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1/gi
+  const categoryPath = /^(?:https:\/\/www\.apple\.com)?(?:\/[a-z]{2}(?:-edu)?)?\/shop\/(?:buy-([a-z0-9-]+)|goto\/buy_([a-z0-9_]+))\/?(?:[?#].*)?$/i
+  for (const match of html.matchAll(links)) {
+    const path = match[2].match(categoryPath)
+    if (!path) continue
+    const shop = (path[1] ?? path[2]).toLowerCase().replace(/_/g, '-')
+    if (FURNITURE.has(shop)) continue
+    const id = categoryOfShop(shop)
+    let category = categories.get(id)
+    if (!category) {
+      category = { id, label: CATEGORIES.find((c) => c.id === id)?.label ?? nameFromSlug(id), shopSlugs: [] }
+      categories.set(id, category)
+    }
+    if (!category.shopSlugs.includes(shop)) category.shopSlugs.push(shop)
+  }
+  return [...categories.values()]
+}
 
 const familyOf = (shop: string, slug: string): Family | null => {
-  const categoryId = SHOP_TO_CATEGORY[shop]
-  if (!categoryId || FURNITURE.has(slug)) return null
+  const categoryId = categoryOfShop(shop)
+  if (FURNITURE.has(shop) || FURNITURE.has(slug)) return null
   const family: Family = {
     id: slug,
     categoryId,

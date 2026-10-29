@@ -1,11 +1,12 @@
 import type { DimensionValue, FamilyStructure, Offer } from '../shared/types'
 import { storeUrl, type Market, type Store } from '../shared/markets'
-import { CATEGORY_INDEXES, FAMILIES, type Family } from '../shared/families'
-import { parseListingFamilies } from './discover'
+import { CATEGORIES, CATEGORY_INDEXES, FAMILIES, type Category, type Family } from '../shared/families'
+import { parseListingFamilies, parseShopCategories, type ShopCategory } from './discover'
 import {
   ctoUrl,
   expandVariant,
   parseCatalogOffers,
+  parseFamilyName,
   parseFamilyStructure,
   parseVariantPricing,
 } from './apple'
@@ -135,7 +136,7 @@ export interface FamilyStructures {
 }
 
 /**
- * Current buy-flow families, from Apple's own category listing.
+ * Current categories from Apple's store front, then families from their listings.
  *
  * A shop index that 404s falls through to the next entry point for that
  * category (the AirPods marketing page, for example). If every listing for
@@ -145,10 +146,31 @@ export interface FamilyStructures {
 export async function discoverFamilies(
   market: Market,
   budget: RequestBudget,
-): Promise<{ families: Family[] }> {
-  const families: Family[] = []
+): Promise<{ families: Family[]; categories: Category[] }> {
+  let discovered: ShopCategory[] = []
+  try {
+    discovered = parseShopCategories(await (await get(storeUrl(market, '/shop'), budget)).text())
+    if (discovered.length === 0) console.warn(`No shop categories found for ${market.id}; using seed`)
+  } catch (error) {
+    console.warn(`Shop category discovery failed for ${market.id}; using seed: ${error}`)
+  }
 
-  for (const { categoryId, routes } of CATEGORY_INDEXES) {
+  // A missing front-page link must not retire a category. Listings still
+  // decide which families are current within that category.
+  const categories = [...discovered]
+  for (const { categoryId } of CATEGORY_INDEXES) {
+    if (!categories.some((category) => category.id === categoryId)) {
+      categories.push({ ...CATEGORIES.find((category) => category.id === categoryId)!, shopSlugs: [] })
+    }
+  }
+  const families: Family[] = []
+  const seen = new Set<string>()
+  for (const { id: categoryId, shopSlugs } of categories) {
+    const shops = categoryId === 'tv-home' ? ['home', ...shopSlugs, 'homepod', 'tv'] : shopSlugs
+    const routes = [...new Set([
+      ...shops.map((shop) => `/shop/buy-${shop}`),
+      ...(CATEGORY_INDEXES.find((index) => index.categoryId === categoryId)?.routes ?? []),
+    ])]
     let listed: Family[] | null = null
     for (const route of routes) {
       try {
@@ -162,10 +184,15 @@ export async function discoverFamilies(
         // A shop index that 404s is why the category has a fallback route.
       }
     }
-    families.push(...(listed ?? FAMILIES.filter((family) => family.categoryId === categoryId)))
+    if (!listed) console.warn(`No listing read for ${market.id}/${categoryId}; using known families`)
+    for (const family of listed ?? FAMILIES.filter((family) => family.categoryId === categoryId)) {
+      if (seen.has(family.id)) continue
+      seen.add(family.id)
+      families.push(family)
+    }
   }
 
-  return { families }
+  return { families, categories: categories.map(({ id, label }) => ({ id, label })) }
 }
 
 /**
@@ -181,16 +208,19 @@ export async function discoverStructures(
   const structures: FamilyStructure[] = []
   const errors: CollectionError[] = []
 
-  await pooled(families, async (family) => {
+  const renamed = await pooled(families, async (original) => {
+    let family = original
     try {
       const html = await (await get(storeUrl(market, family.route), budget)).text()
+      family = { ...family, name: parseFamilyName(html) ?? family.name }
       structures.push(parseFamilyStructure(html, family))
     } catch (error) {
       errors.push({ marketId: market.id, familyId: family.id, store: 'retail', message: String(error) })
     }
+    return family
   })
 
-  return { discoveredAt: new Date().toISOString(), families: [...families], structures, errors }
+  return { discoveredAt: new Date().toISOString(), families: renamed, structures, errors }
 }
 
 export interface MarketCollection {

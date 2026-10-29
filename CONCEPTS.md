@@ -4,8 +4,13 @@ Shared domain vocabulary for this project — entities, named processes, and sta
 
 ## Catalogue and identity
 
+### Category
+One department in Apple's store, discovered from the store front each day. Known shop
+aliases share a stable category id so a renamed department keeps its history and URLs;
+an unfamiliar shop slug introduces a category automatically.
+
 ### Family
-One product line Apple sells through a single buy-flow — iPad Pro, MacBook Air, Apple Watch Ultra. A family is the unit of collection and the unit a reader chooses on the site.
+One product line Apple sells through a single buy-flow — iPad Pro, MacBook Air, Apple Watch Ultra. A family is the unit of collection and the unit a reader chooses on the site. Families are discovered from each category listing each day and named from Apple's select-page titles. Categories, families and options all follow Apple's current store; compile-time tables are fallbacks for failed discovery or older snapshots.
 
 Apple presents a family's options in one of two shapes, and the distinction decides how it is priced. A **catalogue family** offers a fixed set of stocked SKUs whose prices are already on the select page. A **build-to-order family** offers a configurator: prices come from a pricing request per chip or model variant, and each option is quoted as an amount added to that variant.
 
@@ -37,7 +42,7 @@ Which of Apple's two storefronts in a market quoted a price: the retail store, o
 One pass over every family, in every market, at both stores, producing a snapshot. Collection runs outside the serving path, on a schedule, and reports a family it could not read as an error rather than abandoning the pass.
 
 ### Snapshot
-Everything one collection produced: the offers, the families that failed, and when it ran. A snapshot is published whole and replaces its predecessor whole, so a collection that came back much smaller is refused rather than merged — the site keeps serving visibly older prices instead of quietly losing half its catalogue.
+Everything one collection produced: the offers, the families that failed, and when it ran. A snapshot is published whole and replaces its predecessor whole. The publish guard requires families with collection errors to retain at least 90% of their combined published offers; clean families can change shape or retire. Without error reporting, the 90% rule covers the whole catalogue. Every collection must retain at least 50% overall and all published markets, so a silent parser failure cannot empty the site. Published counts first collapse unpaid dimensions, so comparisons count machines rather than duplicate finishes. Clean family counts moving by more than 10% appear in the publish log.
 
 ### Price point
 One recorded observation that a configuration cost a given amount, in one market at one store, on one day. Price points are what the charts read and the only history the project keeps.

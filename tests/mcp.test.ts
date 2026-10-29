@@ -112,6 +112,20 @@ describe('MCP tools', () => {
     expect(FAMILIES.map((f) => f.id)).not.toContain('iphone-18-pro')
   })
 
+  it.each([true, false])('serves a new category, filling a missing stored category when needed (%s)', async (stored) => {
+    const family = { id: 'apple-glasses', categoryId: 'glasses', name: 'Apple Glasses', route: '/shop/buy-glasses/apple-glasses' }
+    const result = toolResult(await call(
+      { jsonrpc: '2.0', id: 42, method: 'tools/call', params: { name: 'list_catalog' } },
+      {
+        ...snapshot,
+        families: [family],
+        ...(stored ? { categories: [{ id: 'glasses', label: 'Apple Glasses' }] } : {}),
+      },
+    ))
+    expect(result.categories).toContainEqual({ id: 'glasses', label: stored ? 'Apple Glasses' : 'Glasses' })
+    expect(result.products).toEqual([{ id: 'apple-glasses', categoryId: 'glasses', name: 'Apple Glasses' }])
+  })
+
   it('deduplicates configurations across markets', async () => {
     const result = toolResult(
       await call({

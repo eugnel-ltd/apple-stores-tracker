@@ -9,6 +9,12 @@ Independent, and not affiliated with Apple.
 
 ## How it gets prices
 
+Categories, families and configuration options are discovered from Apple's store each
+day: the store front supplies categories, each category listing supplies families, and
+each select page supplies options and Apple's own product name. New departments and
+products need no code change. Compile-time tables only provide fallbacks when discovery
+fails or an older snapshot has no stored catalogue.
+
 Apple ships two kinds of product selector, and the scraper handles both:
 
 **Build-to-order** (every Mac). The select page carries the option matrix but no prices
@@ -191,6 +197,14 @@ npm run dev                            # Vite serves that file as /api/snapshot
 the market arguments to sweep all 15 (about half an hour, deliberately paced), then
 `scripts/publish.ts` pushes the result to KV and D1. Live collection is not
 part of normal tests or CI.
+
+The publish guard accepts Apple's line-up changes and retirements for families collected
+without errors, logging count changes over 10%. Families with errors must retain at least
+90% of their combined published offers; without error reporting, that rule covers the
+whole catalogue. Every collection must retain at least 50% overall and all published
+markets. Published offers are counted after collapsing unpaid dimensions, so duplicate
+finishes do not look like missing machines. A refused run leaves the previous snapshot
+in place.
 
 Development follows the repository-owned AI-native SDLC in [`AGENTS.md`](AGENTS.md), with
 the full operating model in [`docs/agents/ai-sdlc.md`](docs/agents/ai-sdlc.md). The default

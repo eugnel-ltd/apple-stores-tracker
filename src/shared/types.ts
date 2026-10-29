@@ -1,4 +1,4 @@
-import type { Family } from './families'
+import type { Category, Family } from './families'
 import type { StoredOffer } from './offers'
 
 /** A single selectable hardware option, e.g. memory 24GB. */
@@ -70,6 +70,8 @@ export interface Snapshot {
    * table.
    */
   families?: Family[]
+  /** Store-front categories; older snapshots use the compile-time fallback. */
+  categories?: Category[]
 }
 
 /** Base-currency conversion rates, keyed by the market's currency. */

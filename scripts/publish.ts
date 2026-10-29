@@ -20,7 +20,7 @@ import { join } from 'node:path'
 import { packOffers } from '../src/shared/offers'
 import { changedPoints, type PricePoint } from '../src/shared/diff'
 import { historyStatements, ROWS_PER_FILE } from '../src/shared/history-sql'
-import { diminishedBy, type PublishedSnapshot } from '../src/shared/publish-guard'
+import { diminishedBy, reshapedFamilies, type PublishedSnapshot } from '../src/shared/publish-guard'
 
 /**
  * Credentials come from the environment and are never read by anything that
@@ -66,6 +66,7 @@ const snapshot = {
   offers,
   errors: local.errors,
   ...(local.families ? { families: local.families } : {}),
+  ...(local.categories ? { categories: local.categories } : {}),
 }
 
 // ---------------------------------------------------------------- guard
@@ -106,9 +107,9 @@ function published(): PublishedSnapshot | null {
  */
 const before = published()
 
-/** See `shared/publish-guard.ts` for why a small collection is not published. */
+/** Clean line-up changes can shrink the range; failed reads cannot explain it. */
 function refuseIfDiminished(): void {
-  const complaints = diminishedBy(before, local)
+  const complaints = diminishedBy(before, { markets: local.markets, offers: local.offers, errors: local.errors })
   if (complaints.length === 0) return
   if (process.env.PUBLISH_ANYWAY === '1') {
     console.log(`publishing a diminished collection on request -- ${complaints.join('; ')}`)
@@ -116,12 +117,15 @@ function refuseIfDiminished(): void {
   }
   throw new Error(
     `refusing to publish: ${complaints.join('; ')}. ` +
-      `${local.errors.length} families failed to collect. Re-run, or set PUBLISH_ANYWAY=1 ` +
-      `if Apple really has withdrawn this much.`,
+      `${new Set(local.errors?.map((error: { familyId: string }) => error.familyId)).size} families failed to collect. ` +
+      `Re-run, or set PUBLISH_ANYWAY=1 after verifying Apple's range.`,
   )
 }
 
 refuseIfDiminished()
+for (const family of reshapedFamilies(before, local)) {
+  console.log(`reshaped by Apple: ${family.familyId} ${family.before} → ${family.now}`)
+}
 
 // ---------------------------------------------------------------- history
 

@@ -7,6 +7,36 @@ import { configKeyOf } from '../shared/offers'
 export { configKeyOf }
 
 /**
+ * Apple names products beyond what a slug can express, including branded
+ * capitalisation and words omitted from the route. Both selector kinds carry
+ * that name in the title, with or without the shop's leading "Buy".
+ */
+export function parseFamilyName(html: string): string | undefined {
+  const title = html.match(/<title\b[^>]*>([\s\S]*?)<\/title\s*>/i)?.[1]
+  if (title === undefined) return undefined
+  const entities: Record<string, string> = {
+    amp: '&', AMP: '&', quot: '"', QUOT: '"', apos: "'", lt: '<', LT: '<', gt: '>', GT: '>', nbsp: ' ',
+    ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”',
+    hellip: '…', reg: '®', trade: '™', copy: '©', eacute: 'é', Eacute: 'É', egrave: 'è', Egrave: 'È',
+    pound: '£', euro: '€', yen: '¥', middot: '·',
+  }
+  const name = title
+    .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (entity, code: string) => {
+      if (!code.startsWith('#')) return Object.hasOwn(entities, code) ? entities[code] : entity
+      const point = code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : Number(code.slice(1))
+      return point > 0 && point <= 0x10ffff && !(point >= 0xd800 && point <= 0xdfff)
+        ? String.fromCodePoint(point)
+        : '�'
+    })
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/^Buy\s+/i, '')
+    .replace(/\s*- Apple(?:\s*\([^)]*\))?$/i, '')
+    .trim()
+  return name || undefined
+}
+
+/**
  * Apple's store pages embed a JS object literal:
  *
  *   window.PRODUCT_SELECTION_BOOTSTRAP = { productSelectionData: { …JSON… } }

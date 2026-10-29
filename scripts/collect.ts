@@ -1,7 +1,7 @@
 /**
  * Run a full sweep locally and write a snapshot.
  *
- * This is the same code the Worker's cron runs, driven from a terminal so the
+ * This is the same code the daily Action runs, driven from a terminal so the
  * scraper can be exercised against the live store without a deploy. Writes
  * `data/snapshot.json`, which `npm run dev` serves as the local API.
  *
@@ -35,11 +35,11 @@ for (const market of markets) {
     const wanted =
       store === 'education'
         ? structures.structures.filter((s) => {
-            const family = listing.families.find((f) => f.id === s.familyId)
+            const family = structures.families.find((f) => f.id === s.familyId)
             return !family || hasEducationPricing(family)
           })
         : structures.structures
-    const collection = await collectFamilies(market, store, wanted, budget, listing.families)
+    const collection = await collectFamilies(market, store, wanted, budget, structures.families)
     offers.push(...collection.offers)
     errors.push(...collection.errors)
     console.log(
@@ -74,7 +74,8 @@ writeFileSync(
     {
       collectedAt: new Date().toISOString(),
       markets: markets.map((m) => m.id),
-      families: listing.families,
+      families: structures.families,
+      categories: listing.categories,
       offers: priced,
       errors,
       fx,
