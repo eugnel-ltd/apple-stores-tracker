@@ -10,6 +10,7 @@
     "ci": "npm run check:governance && npm test && npm run build",
     "dev:worker": "wrangler dev",
     "deploy": "npm run build && wrangler deploy",
+    "release": "jiti scripts/release.ts",
     "db:migrate": "wrangler d1 migrations apply price-history --remote",
     "db:migrate:local": "wrangler d1 migrations apply price-history --local"
   },
