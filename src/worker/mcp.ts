@@ -1,4 +1,4 @@
-import { CATEGORIES, familiesOf } from '../shared/families'
+import { categoriesOf, familiesOf } from '../shared/families'
 import { MARKETS } from '../shared/markets'
 import { hydrateOffers } from '../shared/offers'
 import type { Offer, Snapshot } from '../shared/types'
@@ -103,7 +103,7 @@ function callTool(name: string, args: Record<string, any>, snapshot: Snapshot | 
     return {
       collectedAt: snapshot.collectedAt,
       source: 'Apple Online Store',
-      categories: CATEGORIES,
+      categories: categoriesOf(snapshot),
       products: families.map((f) => ({ id: f.id, name: f.name, categoryId: f.categoryId })),
       markets: MARKETS.map((m) => ({ id: m.id, name: m.name, currency: m.currency })),
       offerCount: snapshot.offers.length,

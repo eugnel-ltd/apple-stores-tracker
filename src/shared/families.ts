@@ -19,6 +19,7 @@ export interface Family {
   educationPricing?: boolean
 }
 
+/** Last-known categories for discovery failures and older snapshots. */
 export const CATEGORIES: Category[] = [
   { id: 'mac', label: 'Mac' },
   { id: 'ipad', label: 'iPad' },
@@ -29,8 +30,45 @@ export const CATEGORIES: Category[] = [
   { id: 'tv-home', label: 'TV & Home' },
 ]
 
+const TOKEN_NAME: Record<string, string> = {
+  macbook: 'MacBook',
+  mac: 'Mac',
+  mini: 'mini',
+  imac: 'iMac',
+  ipad: 'iPad',
+  iphone: 'iPhone',
+  airpods: 'AirPods',
+  homepod: 'HomePod',
+  apple: 'Apple',
+  watch: 'Watch',
+  hermes: 'Hermès',
+  se: 'SE',
+  xdr: 'XDR',
+  tv: 'TV',
+  '4k': '4K',
+  pro: 'Pro',
+  air: 'Air',
+  max: 'Max',
+  neo: 'Neo',
+  studio: 'Studio',
+  display: 'Display',
+  ultra: 'Ultra',
+  vision: 'Vision',
+  duo: 'Duo',
+}
+
+export const nameFromSlug = (id: string): string =>
+  id
+    .split('-')
+    .map((part) => {
+      if (Object.hasOwn(TOKEN_NAME, part)) return TOKEN_NAME[part]
+      if (/^\d/.test(part)) return part
+      return part.charAt(0).toUpperCase() + part.slice(1)
+    })
+    .join(' ')
+
 /**
- * Pages that list a category's current buy-flow families. None of these
+ * Fallback pages when the store front cannot supply a category route. None
  * embed a generation number. A shop index that 404s (`/shop/buy-airpods`)
  * falls through to the marketing page for that category.
  */
@@ -54,6 +92,24 @@ export const hasEducationPricing = (family: Family): boolean =>
  */
 export const familiesOf = (snapshot: { families?: Family[] } | null | undefined): Family[] =>
   snapshot?.families ?? FAMILIES
+
+/**
+ * Stored categories preserve new departments without a release. Older or
+ * incomplete snapshots still need a category for every served family so the
+ * reader can reach it through navigation.
+ */
+export function categoriesOf(
+  snapshot: { categories?: Category[]; families?: Family[] } | null | undefined,
+): Category[] {
+  const categories = [...(snapshot?.categories ?? CATEGORIES)]
+  const seen = new Set(categories.map((category) => category.id))
+  for (const { categoryId } of familiesOf(snapshot)) {
+    if (seen.has(categoryId)) continue
+    seen.add(categoryId)
+    categories.push({ id: categoryId, label: nameFromSlug(categoryId) })
+  }
+  return categories
+}
 
 /**
  * Last-known families. Used when a snapshot has no stored list, and as a

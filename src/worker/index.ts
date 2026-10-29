@@ -1,4 +1,4 @@
-import { CATEGORIES, familiesOf } from '../shared/families'
+import { categoriesOf, familiesOf, type Category } from '../shared/families'
 import { BASE_CURRENCY, MARKETS, REFURB_MARKET } from '../shared/markets'
 import { REFUND_POLICIES } from '../shared/refunds'
 import { handleMcp } from './mcp'
@@ -13,14 +13,14 @@ const json = (body: unknown, maxAge: number): Response =>
     },
   })
 
-const LLMS_TXT = `# Apple Price Tracker
+const llmsTxt = (categories: Category[]) => `# Apple Price Tracker
 
 > Compare official Apple Online Store list prices for one exact product
 > configuration across ${MARKETS.length} markets, ranked in ${BASE_CURRENCY}.
 
 ## Coverage
 
-- Categories: ${CATEGORIES.map((c) => c.label).join(', ')}.
+- Categories: ${categories.map((c) => c.label).join(', ')}.
 - Markets: ${MARKETS.map((m) => m.name).join(', ')}.
 - Data source: Apple's own regional store product selectors, retail and education.
 - Base currency: ${BASE_CURRENCY}. Rates from open.er-api.com, re-read on request as soon as the feed republishes.
@@ -70,7 +70,7 @@ export default {
     }
 
     if (url.pathname === '/llms.txt') {
-      return new Response(LLMS_TXT, {
+      return new Response(llmsTxt(categoriesOf(await getSnapshot(env))), {
         headers: { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'public, max-age=3600' },
       })
     }
@@ -87,7 +87,7 @@ export default {
           collectedAt: snapshot.collectedAt,
           baseCurrency: BASE_CURRENCY,
           markets: MARKETS,
-          categories: CATEGORIES,
+          categories: categoriesOf(snapshot),
           families: familiesOf(snapshot),
           refunds: REFUND_POLICIES,
           fx,

@@ -178,3 +178,35 @@ describe('the per-client rate limit', () => {
     },
   )
 })
+
+
+describe('discovered categories', () => {
+  const family = { id: 'apple-glasses', categoryId: 'glasses', name: 'Apple Glasses', route: '/shop/buy-glasses/apple-glasses' }
+  const category = { id: 'glasses', label: 'Apple Glasses' }
+  const withCategories = {
+    ...env,
+    PRICES: {
+      get: async (key: string) => key === 'snapshot:latest'
+        ? { ...snapshot, families: [family], categories: [category] }
+        : stored[key] ?? null,
+    },
+  } as unknown as Env
+
+  it('serves a stored category that the compile-time table does not name', async () => {
+    const response = await worker.fetch(new Request('https://example.com/api/snapshot'), withCategories, ctx)
+    const body: any = await response.json()
+    expect(body.categories).toEqual([category])
+    expect(body.families).toEqual([family])
+  })
+
+  it('uses the same discovered category labels in llms.txt', async () => {
+    const response = await worker.fetch(new Request('https://example.com/llms.txt'), withCategories, ctx)
+    expect(await response.text()).toContain('- Categories: Apple Glasses.')
+  })
+
+  it('still serves fallback coverage before the first snapshot exists', async () => {
+    const empty = { ...env, PRICES: { get: async () => null } } as unknown as Env
+    const response = await worker.fetch(new Request('https://example.com/llms.txt'), empty, ctx)
+    expect(await response.text()).toContain('TV & Home')
+  })
+})
