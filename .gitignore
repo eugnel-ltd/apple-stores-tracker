@@ -16,3 +16,4 @@ data/
 .claude/gate.log
 .ai-sdlc/quota.json
 .ai-sdlc/bin/
+.release/

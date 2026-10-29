@@ -220,8 +220,16 @@ npx wrangler kv namespace create PRICES
 npx wrangler d1 create price-history
 # put both ids in wrangler.jsonc
 npm run db:migrate
-npm run deploy
+npm run release -- --apply
 ```
+
+Releases go through `npm run release`: the default is a dry run of preflight and
+release evidence; `npm run release -- --apply` also deploys, checks health and rolls
+back a failed release when its deployment identity is proved. Set `AI_SDLC_DIR` to
+an unmodified checkout of `eugnel-ltd/ai-sdlc` at tag `v3`. The command requires a clean
+checkout of current `origin/main`, release level 3 or higher and green enforcement,
+and checks every first-parent commit since enforcement turned green, including the
+transition commit. Apply also requires `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`.
 
 The custom domain is declared in `wrangler.jsonc`; Wrangler creates the DNS record in the
 `eugnel.com` zone on first deploy.
