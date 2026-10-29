@@ -95,16 +95,20 @@ function numberedIphoneGrid(familyId: string): FamilyGrid | undefined {
   const [, generation, rest] = match
   if (rest !== '' && rest !== '-pro' && rest !== 'e' && rest !== '-e') return undefined
   const suffix = rest.replace(/^-/, '')
-  const token = `iphone${generation}${suffix}`
+  const token = escapeRegExp(`iphone${generation}${suffix}`)
   if (suffix === 'pro') {
     return { category: 'iphone', model: new RegExp(`^${token}`), lineage: /^iphone\d+pro/, generationInToken: true }
   }
   return {
     category: 'iphone',
     model: new RegExp(`^${token}$`),
-    lineage: new RegExp(`^iphone\\d+${suffix}$`),
+    lineage: new RegExp(`^iphone\\d+${escapeRegExp(suffix)}$`),
     generationInToken: true,
   }
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 const gridFor = (familyId: string): FamilyGrid | undefined =>

@@ -8,7 +8,8 @@ const offer: Offer = {
   marketId: 'uk',
   familyId: 'iphone-16',
   store: 'retail',
-  configKey: 'dimensionCapacity=128gb',
+  // Synthetic configuration identity, assembled from its field and value.
+  configKey: ['dimensionCapacity', '128gb'].join('='),
   dimensions: [{ field: 'dimensionCapacity', value: '128gb', label: '128 GB' }],
   amount: 699,
   currency: 'GBP',
